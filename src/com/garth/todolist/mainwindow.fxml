@@ -17,6 +17,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.ToggleButton?>
 <BorderPane fx:id="mainBorderPane" fx:controller="com.garth.todolist.Controller"
             xmlns:fx="http://javafx.com/fxml">
 
@@ -26,7 +27,7 @@
                 <Menu text="File">
                     <MenuItem text="New..." onAction="#showNewItemDialog"/>
                     <SeparatorMenuItem/>
-                    <MenuItem text="Exit"/>
+                    <MenuItem text="Exit" onAction="#handleExit"/>
                 </Menu>
             </MenuBar>
             <ToolBar>
@@ -41,6 +42,7 @@
                             </ImageView>
                         </graphic>
                     </Button>
+                    <ToggleButton fx:id="filToggleButton" onAction="#handleFilterButton" text="Today's Items"/>
                 </HBox>
             </ToolBar>
         </VBox>

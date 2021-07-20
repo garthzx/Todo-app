@@ -2,8 +2,10 @@ package com.garth.todolist;
 
 import com.garth.todolist.datamodel.TodoData;
 import com.garth.todolist.datamodel.TodoItem;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,8 +22,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class Controller {
 
@@ -37,6 +39,13 @@ public class Controller {
     private BorderPane mainBorderPane;
     @FXML
     private ContextMenu listContextMenu;
+    @FXML
+    private ToggleButton filToggleButton;
+
+    private FilteredList<TodoItem> filteredList;
+
+    private Predicate<TodoItem> wantAllItems;
+    private Predicate<TodoItem> wantTodayItems;
 
     public void initialize() {
         listContextMenu = new ContextMenu();
@@ -64,8 +73,24 @@ public class Controller {
             }
         });
 
+        wantAllItems = new Predicate<TodoItem>() {
+            @Override
+            public boolean test(TodoItem item) {
+                return true;
+            }
+        };
+
+        wantTodayItems = new Predicate<TodoItem>() {
+            @Override
+            public boolean test(TodoItem item) {
+                return (item.getDeadline().equals(LocalDate.now()));
+            }
+        };
+
+        filteredList = new FilteredList<>(TodoData.getInstance().getTodoItems(), wantAllItems);
+
         // order the to-do tasks according to their deadline (most due - least due)
-        SortedList<TodoItem> sortedList = new SortedList<TodoItem>(TodoData.getInstance().getTodoItems(),
+        SortedList<TodoItem> sortedList = new SortedList<TodoItem>(filteredList,
                 new Comparator<TodoItem>() {
                     @Override
                     public int compare(TodoItem item, TodoItem t1) {
@@ -214,6 +239,37 @@ public class Controller {
         }
     }
 
+    @FXML
+    public void handleFilterButton() {
+        TodoItem selectedItem = todoListView.getSelectionModel().getSelectedItem();
+        if (filToggleButton.isSelected()) {
+            // return items with a deadline of today only
+            filteredList.setPredicate(wantTodayItems);
+            // if there are no records having deadline of today
+            if (filteredList.isEmpty()) {
+                itemDetailsTextArea.clear();
+                deadlineLabel.setText("");
+            }
+            // if the currently-selected item is in the filteredList, select it
+            else if (filteredList.contains(selectedItem)) {
+                todoListView.getSelectionModel().select(selectedItem);
+            }
+            // selects the first
+            else {
+                todoListView.getSelectionModel().selectFirst();
+            }
+        }
+        // if button is not selected, show everything
+        else {
+            filteredList.setPredicate(wantAllItems );
+            todoListView.getSelectionModel().select(selectedItem);
+        }
+    }
+
+    @FXML
+    public void handleExit() {
+        Platform.exit();
+    }
 }
 
 
