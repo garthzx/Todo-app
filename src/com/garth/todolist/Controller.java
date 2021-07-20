@@ -11,10 +11,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
@@ -47,6 +51,7 @@ public class Controller {
     private Predicate<TodoItem> wantAllItems;
     private Predicate<TodoItem> wantTodayItems;
 
+    @FXML
     public void initialize() {
         listContextMenu = new ContextMenu();
         MenuItem deleteMenuItem = new MenuItem("Delete");
@@ -268,7 +273,18 @@ public class Controller {
 
     @FXML
     public void handleExit() {
-        Platform.exit();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Exit Todo App");
+        Label label = new Label("Are you sure? Press OK to confirm, or cancel to back out.");
+        label.setWrapText(true);
+        alert.getDialogPane().setContent(label);
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            Platform.exit();
+        }
+        else {
+            alert.close();
+        }
     }
 }
 
